@@ -1,0 +1,18 @@
+<div class="group-tags-input">
+  <div class="group-tags-input__tags">
+    {{#each this.tags as |tag|}}
+      <span class="group-tag">
+        {{tag}}
+        <button class="remove-tag" {{on "click" (fn this.removeTag tag)}}>
+          {{d-icon "times"}}
+        </button>
+      </span>
+    {{/each}}
+    </div>
+  <Input
+    @value={{this.newTag}}
+    @placeholder={{i18n "admin.groups.custom_tags_placeholder"}}
+    class="tag-input"
+    {{on "keydown" this.handleKeyDown}}
+  />
+</div>

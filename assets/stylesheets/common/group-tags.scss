@@ -1,0 +1,48 @@
+.group-tags-input {
+
+  .group-tag {
+    display: inline-flex;
+    color: #fff;
+    padding: 2px 6px;
+    margin: 2px 4px 2px 0;
+    border-radius: 3px;
+    font-size: 0.85em;
+
+    // Vary background colors
+    &:nth-child(1) { background: #5B8DEF; }  // blue
+    &:nth-child(2) { background: #4CC9F0; }  // cyan
+    &:nth-child(3) { background: #48B78C; }  // green
+    &:nth-child(4) { background: #F9A826; }  // orange
+    &:nth-child(5) { background: #F76E6E; }  // red
+    &:nth-child(6) { background: #C77DFF; }  // violet
+    &:nth-child(7) { background: #FFADAD; }  // pink
+    &:nth-child(8) { background: #7F7F7F; }  // gray
+
+    // Fallback for additional tags
+    &:nth-child(n+9) { background: #ccc; color: #000; }
+
+    .remove-tag {
+      margin-left: 6px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+
+    button {
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+  }
+
+  .tag-input {
+    display: inline-block;
+    width: auto;
+    min-width: 150px;
+    margin-top: 4px;
+  }
+}
