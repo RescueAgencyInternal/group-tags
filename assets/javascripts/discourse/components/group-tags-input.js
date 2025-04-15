@@ -2,13 +2,16 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { A } from "@ember/array";
 import { action } from "@ember/object";
-
+import { ajax } from "discourse/lib/ajax";
 export default class GroupTagsInputComponent extends Component {
   @tracked tags = A([]);
   @tracked newTag = "";
+  @tracked allTags = [];
 
   constructor() {
     super(...arguments);
+
+    this.loadAvailableTags();
 
     const customTags =
       this.args.model?.custom_fields?.group_custom_tags ||
@@ -28,6 +31,16 @@ export default class GroupTagsInputComponent extends Component {
     }
 
     this.tags = A(parsed.slice());
+  }
+
+  async loadAvailableTags() {
+    try {
+      const allTags = await ajax("/group-tags/all.json");
+      this.allTags = allTags;
+    } catch (e) {
+      console.error("Error fetching group tags:", e);
+      this.allTags = [];
+    }
   }
 
   @action
@@ -53,6 +66,14 @@ export default class GroupTagsInputComponent extends Component {
   }
 
   @action
+  addExistingTag(tag) {
+    if (!this.tags.includes(tag)) {
+      this.tags = A([...this.tags, tag]);
+      this._syncCustomFields();
+    }
+  }
+
+  @action
   removeTag(tag) {
     this.tags = A(this.tags.filter(t => t !== tag));
     this._syncCustomFields();
@@ -65,11 +86,9 @@ export default class GroupTagsInputComponent extends Component {
       model.setCustomFields({
         group_custom_tags: JSON.stringify(this.tags),
       });
-      console.log('converted', model);
     } else {
       if (!model.custom_fields) model.custom_fields = {};
       model.custom_fields.group_custom_tags = JSON.stringify(this.tags.toArray());
-      console.log('no func', model)
     }
   }
 

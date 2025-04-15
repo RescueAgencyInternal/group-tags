@@ -1,6 +1,11 @@
 .group-tags-input {
+  .existing-tags > button {
+    background-color: #ccc !important;
+    color: #000 !important;
+  }
 
-  .group-tag {
+  .group-tag,
+  .existing-tags > button {
     display: inline-flex;
     color: #fff;
     padding: 2px 6px;
@@ -30,13 +35,14 @@
         color: #fff;
       }
     }
+  }
 
-    button {
-      background-color: transparent;
-      border: none;
-      padding: 0;
-      margin: 0;
-    }
+  button {
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
   }
 
   .tag-input {

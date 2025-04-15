@@ -4,7 +4,7 @@
       <span class="group-tag">
         {{tag}}
         <button class="remove-tag" {{on "click" (fn this.removeTag tag)}}>
-          {{d-icon "times"}}
+          {{d-icon "xmark"}}
         </button>
       </span>
     {{/each}}
@@ -15,4 +15,12 @@
     class="tag-input"
     {{on "keydown" this.handleKeyDown}}
   />
+  <div class="existing-tags">
+    <p>Add an existing tag:</p>
+    {{#each this.allTags.discourse_group_tags as |existing|}}
+      <button type="button" class="existing-tag" {{on "click" (fn this.addExistingTag existing)}}>
+        {{existing}}
+      </button>
+    {{/each}}
+  </div>
 </div>
