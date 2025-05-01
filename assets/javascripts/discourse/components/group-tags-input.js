@@ -1,95 +1,152 @@
+// group-tags-input.js
+
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { A } from "@ember/array";
 import { action } from "@ember/object";
-import { ajax } from "discourse/lib/ajax";
+import groupTagOptions from "../lib/group-tag-options";
+
 export default class GroupTagsInputComponent extends Component {
-  @tracked tags = A([]);
-  @tracked newTag = "";
-  @tracked allTags = [];
+  @tracked allTags = groupTagOptions;
+  @tracked primarySector = "";
+  @tracked secondaryTags = A([]);
+  @tracked showCustomPrimaryInput = false;
+  @tracked customPrimaryInputValue = "";
+  @tracked showCustomSecondaryInput = false;
+  @tracked customSecondaryInputValue = "";
+  @tracked selectedSecondaryTag = "";
 
   constructor() {
     super(...arguments);
 
-    this.loadAvailableTags();
+    const model = this.args.model || this.args.group;
 
-    const customTags =
-      this.args.model?.custom_fields?.group_custom_tags ||
-      this.args.group?.custom_fields?.group_custom_tags ||
-      [];
+    // Load primary sector
+    this.primarySector =
+      model?.custom_fields?.primary_sector?.toString?.().trim() || "";
 
+    // Load secondary sectors
+    const raw = model?.custom_fields?.secondary_sectors;
     let parsed = [];
 
-    if (typeof customTags === "string") {
+    if (typeof raw === "string") {
       try {
-        parsed = JSON.parse(customTags);
+        parsed = JSON.parse(raw);
       } catch {
         parsed = [];
       }
-    } else if (Array.isArray(customTags)) {
-      parsed = customTags;
+    } else if (Array.isArray(raw)) {
+      parsed = raw;
     }
 
-    this.tags = A(parsed.slice());
+    this.secondaryTags = A(parsed.slice());
   }
 
-  async loadAvailableTags() {
-    try {
-      const allTags = await ajax("/group-tags/all.json");
-      this.allTags = allTags;
-    } catch (e) {
-      console.error("Error fetching group tags:", e);
-      this.allTags = [];
-    }
+  get availableSecondaryTags() {
+    return this.allTags.filter(
+      (tag) =>
+        tag !== this.primarySector &&
+        !this.secondaryTags.includes(tag) &&
+        tag !== "custom"
+    );
   }
 
-  @action
-  handleKeyDown(event) {
-    if (event.key === "Enter" || event.key === ",") {
-      event.preventDefault();
-      this.addTag();
-    }
-  }
+  get availablePrimaryTags() {
+    let tags = this.allTags.filter(
+      (tag) => tag !== "custom" && !this.secondaryTags.includes(tag)
+    );
 
-  @action
-  addTag() {
-    let tag = this.newTag?.trim().replace(/[^0-9A-Za-z ]/g, "");
-    if (!tag || this.tags.map(t => t.toLowerCase()).includes(tag.toLowerCase())) {
-      this.newTag = "";
-      return;
+    if (this.primarySector && !tags.includes(this.primarySector)) {
+      tags = [...tags, this.primarySector];
     }
 
-    this.tags = A([...this.tags, tag]);
-    this.newTag = "";
-
-    this._syncCustomFields();
+    return tags;
   }
 
   @action
-  addExistingTag(tag) {
-    if (!this.tags.includes(tag)) {
-      this.tags = A([...this.tags, tag]);
+  onPrimaryChange(event) {
+    const value = event.target.value;
+
+    if (value === "custom") {
+      this.showCustomPrimaryInput = true;
+      this.customPrimaryInputValue = "";
+    } else {
+      this.primarySector = value;
+      this.showCustomPrimaryInput = false;
       this._syncCustomFields();
     }
   }
 
   @action
-  removeTag(tag) {
-    this.tags = A(this.tags.filter(t => t !== tag));
+  onCustomPrimaryInput(event) {
+    this.customPrimaryInputValue = event.target.value;
+  }
+
+  @action
+  onCustomPrimaryInputKeydown(event) {
+    if (event.key === "Enter" && this.customPrimaryInputValue.trim()) {
+      this.primarySector = this.customPrimaryInputValue.trim();
+      this.showCustomPrimaryInput = false;
+      this._syncCustomFields();
+    }
+  }
+
+  @action
+  onSecondaryChange(event) {
+    const value = event.target.value;
+
+    if (value === "custom") {
+      this.showCustomSecondaryInput = true;
+      this.customSecondaryInputValue = "";
+    } else if (value && !this.secondaryTags.includes(value)) {
+      this.secondaryTags = A([...this.secondaryTags, value]);
+      this.showCustomSecondaryInput = false;
+      this.selectedSecondaryTag = ""; // ✅ reset the select
+      this._syncCustomFields();
+    }
+  }
+
+  @action
+  onCustomSecondaryInput(event) {
+    this.customSecondaryInputValue = event.target.value;
+  }
+
+  @action
+  onCustomSecondaryInputKeydown(event) {
+    if (event.key === "Enter" && this.customSecondaryInputValue.trim()) {
+      const tag = this.customSecondaryInputValue.trim();
+      if (!this.secondaryTags.includes(tag)) {
+        this.secondaryTags = A([...this.secondaryTags, tag]);
+        this._syncCustomFields();
+      }
+      this.customSecondaryInputValue = "";
+      this.showCustomSecondaryInput = false;
+    }
+  }
+
+  @action
+  removeSecondaryTag(tag) {
+    const filtered = this.secondaryTags.filter((t) => t !== tag);
+    this.secondaryTags = A(filtered);
     this._syncCustomFields();
   }
 
   _syncCustomFields() {
     const model = this.args.model || this.args.group;
 
+    const secondary = JSON.stringify(this.secondaryTags ?? []);
+
     if (typeof model.setCustomFields === "function") {
       model.setCustomFields({
-        group_custom_tags: JSON.stringify(this.tags),
+        primary_sector: this.primarySector,
+        secondary_sectors: secondary,
       });
     } else {
-      if (!model.custom_fields) model.custom_fields = {};
-      model.custom_fields.group_custom_tags = JSON.stringify(this.tags.toArray());
+      if (!model.custom_fields) {
+        model.custom_fields = {};
+      }
+      model.custom_fields.primary_sector = this.primarySector;
+      model.custom_fields.secondary_sectors = secondary;
     }
   }
-
 }

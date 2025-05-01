@@ -1,26 +1,58 @@
 <div class="group-tags-input">
-  <div class="group-tags-input__tags">
-    {{#each this.tags as |tag|}}
-      <span class="group-tag">
-        {{tag}}
-        <button class="remove-tag" {{on "click" (fn this.removeTag tag)}}>
-          {{d-icon "xmark"}}
-        </button>
-      </span>
-    {{/each}}
+  <label><strong>Primary Sector</strong></label>
+  <div class="group-tags-input__selector">
+    <select class="tag-select" value={{this.primarySector}} {{on "change" this.onPrimaryChange}}>
+      <option disabled selected value="">Choose a primary sector</option>
+      {{#each this.availablePrimaryTags as |tag|}}
+        <option value={{tag}} selected={{eq tag this.primarySector}}>{{tag}}</option>
+      {{/each}}
+      <option value="custom">Custom...</option>
+    </select>
+
+    {{#if this.showCustomPrimaryInput}}
+      <input
+        class="tag-input"
+        type="text"
+        value={{this.customPrimaryInputValue}}
+        placeholder="Enter custom primary sector..."
+        {{on "input" this.onCustomPrimaryInput}}
+        {{on "keydown" this.onCustomPrimaryInputKeydown}}
+      />
+    <p class="help-text">{{i18n "admin.groups.custom_tags_help"}}</p>
+    {{/if}}
+  </div>
+
+  <hr />
+
+  <label><strong>Secondary Sector(s)</strong></label>
+  <div class="group-tags-input__selector">
+    <div class="existing-tags">
+      {{#each this.secondaryTags as |tag|}}
+        <span class="group-tag">
+          {{tag}}
+          <button type="button" class="remove-tag" {{on "click" (fn this.removeSecondaryTag tag)}}>&times;</button>
+        </span>
+      {{/each}}
     </div>
-  <Input
-    @value={{this.newTag}}
-    @placeholder={{i18n "admin.groups.custom_tags_placeholder"}}
-    class="tag-input"
-    {{on "keydown" this.handleKeyDown}}
-  />
-  <div class="existing-tags">
-    <p>Add an existing tag:</p>
-    {{#each this.allTags.discourse_group_tags as |existing|}}
-      <button type="button" class="existing-tag" {{on "click" (fn this.addExistingTag existing)}}>
-        {{existing}}
-      </button>
-    {{/each}}
+
+    <select class="tag-select" value={{this.selectedSecondaryTag}} {{on "change" this.onSecondaryChange}}>
+      <option disabled selected value="">Secondary sector</option>
+      {{#each this.availableSecondaryTags as |tag|}}
+        <option value={{tag}}>{{tag}}</option>
+      {{/each}}
+      <option value="custom">Custom...</option>
+    </select>
+
+    {{#if this.showCustomSecondaryInput}}
+      <input
+        class="tag-input"
+        type="text"
+        value={{this.customSecondaryInputValue}}
+        placeholder="Enter custom secondary sector..."
+        {{on "input" this.onCustomSecondaryInput}}
+        {{on "keydown" this.onCustomSecondaryInputKeydown}}
+      />
+      <p class="help-text">{{i18n "admin.groups.custom_tags_help"}}</p>
+    {{/if}}
   </div>
 </div>

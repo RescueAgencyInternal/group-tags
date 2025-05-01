@@ -2,6 +2,6 @@ en:
   js:
     admin:
       groups:
-        custom_tags_label: "Partner Categories"
+        custom_tags_label: "Partner Sector"
         custom_tags_placeholder: "Add a tag and press Enter"
         custom_tags_help: "Tags can include letters, numbers, and spaces (unique per group)."
