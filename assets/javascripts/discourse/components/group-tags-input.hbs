@@ -35,13 +35,17 @@
       {{/each}}
     </div>
 
-    <select class="tag-select" value={{this.selectedSecondaryTag}} {{on "change" this.onSecondaryChange}}>
+    <select class="tag-select" value={{this.selectedSecondaryTag}} {{on "change" this.onSecondaryChange}} disabled={{gte this.secondaryTags.length 2}}>
       <option disabled selected value="">Secondary sector</option>
       {{#each this.availableSecondaryTags as |tag|}}
         <option value={{tag}}>{{tag}}</option>
       {{/each}}
       <option value="custom">Custom...</option>
     </select>
+
+    {{#if (eq this.secondaryTags.length 2)}}
+      <p class="tag-limit-warning">You can only add up to 2 secondary sectors.</p>
+    {{/if}}
 
     {{#if this.showCustomSecondaryInput}}
       <input

@@ -5,6 +5,7 @@
 # url: https://github.com/RescueAgencyInternal/group-tags
 
 register_asset "stylesheets/common/group-tags.scss"
+register_asset "stylesheets/common/group-index-box-after.scss"
 
 after_initialize do
   # normalize and store secondary sectors as JSON string
@@ -27,6 +28,8 @@ after_initialize do
     object.custom_fields["primary_sector"].present?
   end
 
+  add_to_serializer(:group_show, :custom_fields) { object.custom_fields }
+
   # deserialize secondary_sectors from JSON
   add_to_serializer(:group_show, :secondary_sectors) do
     raw = object.custom_fields["secondary_sectors"]
@@ -37,6 +40,8 @@ after_initialize do
     end
   end
 
+  add_to_serializer(:basic_group, :custom_fields) { object.custom_fields }
+
   add_to_serializer(:group_show, :include_secondary_sectors?) do
     object.custom_fields["secondary_sectors"].present?
   end
@@ -44,28 +49,4 @@ after_initialize do
   # allow both fields to be edited from the admin UI
   register_editable_group_custom_field :primary_sector
   register_editable_group_custom_field :secondary_sectors
-
-  # route for to get all tags, not used anymore
- #Discourse::Application.routes.append do
- #  get "/group-tags/all.json", to: ::DiscourseGroupTagsController.action(:all)
- #end
-
- #class ::DiscourseGroupTagsController < ::ApplicationController
- #  requires_plugin ::Plugin::Instance
-
- #  def all
- #    tags = GroupCustomField
- #      .where(name: "secondary_sectors")
- #      .pluck(:value)
- #      .flat_map do |json|
- #        begin
- #          JSON.parse(json)
- #        rescue JSON::ParserError
- #          []
- #        end
- #      end
-
- #    render json: tags.uniq.compact.reject(&:blank?).sort
- #  end
- #end
 end

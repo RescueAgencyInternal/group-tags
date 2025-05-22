@@ -95,13 +95,17 @@ export default class GroupTagsInputComponent extends Component {
   onSecondaryChange(event) {
     const value = event.target.value;
 
+    if (this.secondaryTags.length >= 2) {
+      return; // Limit reached
+    }
+
     if (value === "custom") {
       this.showCustomSecondaryInput = true;
       this.customSecondaryInputValue = "";
     } else if (value && !this.secondaryTags.includes(value)) {
       this.secondaryTags = A([...this.secondaryTags, value]);
       this.showCustomSecondaryInput = false;
-      this.selectedSecondaryTag = ""; // ✅ reset the select
+      this.selectedSecondaryTag = "";
       this._syncCustomFields();
     }
   }
@@ -114,11 +118,16 @@ export default class GroupTagsInputComponent extends Component {
   @action
   onCustomSecondaryInputKeydown(event) {
     if (event.key === "Enter" && this.customSecondaryInputValue.trim()) {
+      if (this.secondaryTags.length >= 2) {
+        return; // Limit reached
+      }
+
       const tag = this.customSecondaryInputValue.trim();
       if (!this.secondaryTags.includes(tag)) {
         this.secondaryTags = A([...this.secondaryTags, tag]);
         this._syncCustomFields();
       }
+
       this.customSecondaryInputValue = "";
       this.showCustomSecondaryInput = false;
     }

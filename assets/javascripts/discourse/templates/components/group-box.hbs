@@ -1,0 +1,27 @@
+<div class="group-box">
+  <div><h2>test!!</h2></div>
+
+  <div class="group-box-inner">
+    <LinkTo @route="group.show" @model={{@group.name}} class="group-box-image">
+      <Avatar @args={{hash user=@group flairName="small"}} />
+    </LinkTo>
+
+    <div class="group-box-content">
+      <LinkTo @route="group.show" @model={{@group.name}} class="group-box-name">
+        {{@group.full_name}}
+      </LinkTo>
+
+      <div class="group-box-username">@{{@group.name}}</div>
+
+      {{#if @group.custom_fields.primary_sector}}
+        <div class="group-box-sector">
+          Sector: {{@group.custom_fields.primary_sector}}
+        </div>
+      {{/if}}
+
+      <div class="group-box-description">
+        {{@group.bio_excerpt}}
+      </div>
+    </div>
+  </div>
+</div>
